@@ -17,39 +17,20 @@ This system can accurately classify bananas into four ripeness categories:
 
 ## 🏆 Model Performance
 
-### Current Model Accuracy: **92.5%**
+### Current Model Accuracy: **93.4%**
 
-#### Per-Class Performance:
-```
-Class        Precision   Recall   F1-Score   Support
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Unripe       0.94        0.91     0.92       150
-Ripe         0.95        0.96     0.95       180
-Overripe     0.89        0.90     0.89       165
-Rotten       0.92        0.93     0.92       155
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Overall      0.93        0.93     0.92       650
-```
+#### Per-Class Accuracy:
+![Per-Class Accuracy Chart](model/per_class_accuracy.jpg)
 
-#### Class-wise Accuracy Visualization:
-```
-Accuracy by Class
-├─ Ripe      ████████████████████ 96.0%
-├─ Unripe    ███████████████████  91.0%
-├─ Rotten    ███████████████████  93.0%
-└─ Overripe  ██████████████████   90.0%
-```
+- **Rotten**: 96.8% accuracy
+- **Unripe**: 91.8% accuracy  
+- **Overripe**: 92.0% accuracy
+- **Ripe**: 91.6% accuracy
 
 #### Confusion Matrix:
-```
-           Predicted
-Actual    │ Unr │ Rip │ Ovr │ Rot │
-──────────┼─────┼─────┼─────┼─────┤
-Unripe    │ 137 │  8  │  3  │  2  │
-Ripe      │  4  │ 173 │  2  │  1  │
-Overripe  │  6  │  5  │ 148 │  6  │
-Rotten    │  3  │  2  │  6  │ 144 │
-```
+![Confusion Matrix](model/final_confusion_matrix.jpg)
+
+The confusion matrix shows excellent performance with minimal misclassifications between classes, demonstrating the model's reliability in real-world scenarios.
 
 ## 🚀 Quick Start - Using Pre-trained Model
 
@@ -60,18 +41,21 @@ cd banana-classification
 pip install -r requirements.txt
 ```
 
-### 2. Directory Structure
+### 2. Project Structure
 ```
 banana-classification/
+├── .github/
+│   └── workflows/
+│       └── CI.yaml                  # GitHub Actions workflow
 ├── model/
-│   ├── banana_model_FINAL.keras      # Pre-trained model
-│   ├── final_confusion_matrix.jpg    # Performance visualization
-│   └── per_class_accuracy.jpg        # Class accuracy chart
-├── app.py                           # FastAPI service
-├── train_model.py                   # Training pipeline
-├── test_client.py                   # API testing script
-├── requirements.txt                 # Dependencies
-└── README.md                        # This file
+│   ├── banana_model_FINAL.keras     # Pre-trained model (93.4% accuracy)
+│   ├── final_confusion_matrix.jpg   # Model performance visualization
+│   └── per_class_accuracy.jpg       # Per-class accuracy chart
+├── app.py                          # FastAPI web service
+├── train_model.py                  # Complete training pipeline
+├── requirements.txt                # Python dependencies
+├── .gitignore                      # Git ignore rules
+└── README.md                       # This documentation
 ```
 
 ### 3. Start the API Service
@@ -85,25 +69,35 @@ python app.py
 
 ## 🔧 Training Your Own Model
 
-### Dataset Structure
-Organize your data as follows:
+### Prerequisites - Download Dataset
+Before training, you need to download the banana classification dataset:
+
+1. **Download from Kaggle**: https://www.kaggle.com/datasets/atrithakar/banana-classification
+2. **Extract** the dataset to create a `dataset/` folder in your project root
+3. **Ensure** the following structure:
+
 ```
-banana_classification/
-├── train/
-│   ├── unripe/
-│   ├── ripe/
-│   ├── overripe/
-│   └── rotten/
-├── valid/
-│   ├── unripe/
-│   ├── ripe/
-│   ├── overripe/
-│   └── rotten/
-└── test/
-    ├── unripe/
-    ├── ripe/
-    ├── overripe/
-    └── rotten/
+banana-classification/
+├── dataset/                        # Download from Kaggle link above
+│   ├── train/
+│   │   ├── unripe/
+│   │   ├── ripe/
+│   │   ├── overripe/
+│   │   └── rotten/
+│   ├── valid/
+│   │   ├── unripe/
+│   │   ├── ripe/
+│   │   ├── overripe/
+│   │   └── rotten/
+│   └── test/
+│       ├── unripe/
+│       ├── ripe/
+│       ├── overripe/
+│       └── rotten/
+├── model/
+├── app.py
+├── train_model.py
+└── requirements.txt
 ```
 
 ### Training Commands
@@ -111,16 +105,23 @@ banana_classification/
 # Install dependencies
 pip install -r requirements.txt
 
+# Download dataset from Kaggle (required!)
+# https://www.kaggle.com/datasets/atrithakar/banana-classification
+# Extract to dataset/ folder
+
+# Verify dataset structure
+ls dataset/train/  # Should show: unripe ripe overripe rotten
+
 # Start training
 python train_model.py
 ```
 
 ### Training Features:
 - **Transfer Learning**: Uses pre-trained EfficientNetB0
-- **Data Augmentation**: Rotation, flip, zoom, contrast adjustments
+- **Data Augmentation**: Rotation, flip, zoom, contrast adjustments  
 - **Smart Callbacks**: Early stopping, learning rate reduction
 - **Fine-tuning**: Unfreezes top layers for better performance
-- **Automatic Saving**: Best model saved automatically
+- **Automatic Saving**: Best model saved automatically to `model/` directory
 
 ### Expected Training Time:
 - **Initial Training**: ~15-20 epochs (10-15 minutes on GPU)
@@ -140,7 +141,7 @@ GET /
 #### 💚 Health Check
 ```bash
 GET /health
-# Returns server status and model status
+# Returns server status and model loading status
 ```
 
 #### 🤖 Model Information
@@ -194,11 +195,6 @@ POST /predict/batch
 3. Upload your banana image
 4. Get instant results!
 
-#### Using the Test Client:
-```bash
-python test_client.py
-```
-
 #### Using cURL:
 ```bash
 # Single prediction
@@ -214,7 +210,8 @@ curl http://localhost:8000/model/info
 ## 🎁 Key Benefits & Features
 
 ### 🧠 **Advanced AI Capabilities**
-- **High Accuracy**: 92.5% overall accuracy across all classes
+- **High Accuracy**: 93.4% overall accuracy across all classes
+- **Balanced Performance**: Consistent accuracy across all ripeness stages
 - **Transfer Learning**: Leverages pre-trained EfficientNet knowledge
 - **Robust Preprocessing**: Handles various image formats and sizes
 - **Real-time Inference**: Fast predictions (< 100ms per image)
@@ -225,12 +222,14 @@ curl http://localhost:8000/model/info
 - **Batch Processing**: Handle multiple images simultaneously
 - **Error Handling**: Comprehensive error responses
 - **CORS Support**: Ready for web integration
+- **Health Monitoring**: Built-in health checks
 
 ### 🛠️ **Developer-Friendly**
 - **Easy Setup**: Simple pip install requirements
-- **Well-Documented**: Comprehensive code comments
+- **Well-Documented**: Comprehensive code comments and README
 - **Modular Design**: Separate training and inference code
 - **Extensible**: Easy to add new classes or features
+- **CI/CD Ready**: GitHub Actions workflow included
 
 ### 🔧 **Deployment Ready**
 - **Docker Compatible**: Easy containerization
@@ -267,110 +266,115 @@ Output Probabilities
 
 ## 📊 Performance Analysis
 
-### Strengths:
-- **Excellent Ripe Detection**: 96% accuracy for optimal eating bananas
-- **Reliable Rotten Detection**: 93% accuracy for spoiled bananas  
-- **Balanced Performance**: No significant class bias
+### Model Strengths:
+- **Excellent Rotten Detection**: 96.8% accuracy - critical for food safety
+- **Reliable Unripe Detection**: 91.8% accuracy for premature bananas
+- **Consistent Performance**: All classes achieve >90% accuracy
+- **Minimal Confusion**: Clean separation between ripeness stages
 - **Fast Inference**: Suitable for real-time applications
 
-### Use Cases:
-- **Grocery Stores**: Automatic quality assessment
+### Real-World Applications:
+- **Grocery Stores**: Automated quality assessment and sorting
 - **Food Apps**: Smart recipe recommendations based on ripeness
-- **Supply Chain**: Quality control in banana distribution
-- **Research**: Agricultural studies and waste reduction
+- **Supply Chain**: Quality control in banana distribution and logistics
+- **Smart Kitchens**: IoT integration for food freshness monitoring
+- **Research**: Agricultural studies and food waste reduction
 
 ## 🔧 System Requirements
 
 ### Minimum Requirements:
 - **Python**: 3.8 or higher
 - **RAM**: 4GB (8GB recommended)
-- **Storage**: 2GB free space
+- **Storage**: 3GB free space (including dataset)
 - **CPU**: Any modern processor
 
 ### Recommended for Training:
-- **GPU**: NVIDIA GPU with CUDA support
+- **GPU**: NVIDIA GPU with CUDA support (GTX 1060 or better)
 - **RAM**: 16GB or higher
-- **Storage**: SSD recommended
+- **Storage**: SSD recommended for faster data loading
+
+### Dataset Requirements:
+- **Download Size**: ~500MB (compressed)
+- **Extracted Size**: ~1.2GB
+- **Images**: ~3000+ banana images across 4 classes
+- **Source**: Kaggle - high-quality, labeled dataset
 
 ## 📝 File Descriptions
 
-| File | Description |
-|------|-------------|
+| File/Folder | Description |
+|-------------|-------------|
 | `app.py` | FastAPI web service with all endpoints |
 | `train_model.py` | Complete training pipeline with fine-tuning |
-| `test_client.py` | Python client for testing API endpoints |
 | `requirements.txt` | All Python dependencies |
-| `model/banana_model_FINAL.keras` | Pre-trained model file |
-| `model/final_confusion_matrix.jpg` | Performance visualization |
-| `model/per_class_accuracy.jpg` | Class-wise accuracy chart |
+| `model/banana_model_FINAL.keras` | Pre-trained model (93.4% accuracy) |
+| `model/final_confusion_matrix.jpg` | Detailed confusion matrix visualization |
+| `model/per_class_accuracy.jpg` | Per-class accuracy comparison chart |
+| `.github/workflows/CI.yaml` | GitHub Actions continuous integration |
+| `.gitignore` | Git ignore rules for Python projects |
+| `dataset/` | ⚠️ **Must download separately from Kaggle** |
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Commit changes: `git commit -am 'Add feature'`
-4. Push to branch: `git push origin feature-name`
-5. Submit a Pull Request
+We welcome contributions! Here's how to get started:
 
+1. **Fork** the repository
+2. **Download** the dataset from the Kaggle link above
+3. **Create** a feature branch: `git checkout -b feature-name`
+4. **Test** your changes with the dataset
+5. **Commit** changes: `git commit -am 'Add feature'`
+6. **Push** to branch: `git push origin feature-name`
+7. **Submit** a Pull Request
 
-## 🆘 Troubleshooting
-
-### Common Issues:
-
-#### Model Not Loading:
+### Development Setup:
 ```bash
-# Check if model file exists
-ls -la model/banana_model_FINAL.keras
-
-# Verify path in app.py (line 29)
-MODEL_PATH = "model/banana_model_FINAL.keras"
-```
-
-#### Dependencies Issues:
-```bash
-# Update pip first
-python -m pip install --upgrade pip
+# Clone your fork
+git clone https://github.com/yourusername/banana-classification.git
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Download dataset to dataset/ folder
+# https://www.kaggle.com/datasets/atrithakar/banana-classification
+
+# Test the setup
+python app.py
 ```
+``
 
-#### Port Already in Use:
-```bash
-# Kill process on port 8000
-lsof -ti:8000 | xargs kill -9
+## 📊 Dataset Information
 
-# Or use different port
-uvicorn app:app --host 0.0.0.0 --port 8001
-```
+**Dataset Source**: [Banana Classification - Kaggle](https://www.kaggle.com/datasets/atrithakar/banana-classification)
 
-#### GPU/CUDA Issues:
-```bash
-# Verify TensorFlow can see GPU
-python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+### Dataset Statistics:
+- **Total Images**: ~3,000+ high-quality banana images
+- **Classes**: 4 (Unripe, Ripe, Overripe, Rotten)
+- **Image Format**: JPG/JPEG
+- **Resolution**: Various (automatically resized to 224x224)
+- **Train/Valid/Test Split**: Pre-organized for immediate use
 
-# Install CUDA version if needed
-pip install tensorflow[and-cuda]
-```
+### Data Quality:
+- ✅ **High Resolution**: Clear, detailed images
+- ✅ **Diverse Conditions**: Various lighting and backgrounds
+- ✅ **Balanced Classes**: Roughly equal samples per class
+- ✅ **Quality Labeled**: Manually verified classifications
 
-## 🎯 Future Enhancements
-
-- [ ] **Mobile App Integration**: React Native/Flutter support
-- [ ] **Real-time Video**: Process video streams
-- [ ] **Additional Classes**: Include more ripeness stages
-- [ ] **Confidence Visualization**: Heat maps showing decision areas
-- [ ] **Model Optimization**: TensorRT/TFLite conversion for edge deployment
-- [ ] **A/B Testing**: Multiple model comparison
-- [ ] **Data Drift Detection**: Monitor model performance over time
-
-## 📞 Support
+## 📞 Support & Contact
 
 For issues, questions, or contributions:
-- 📧 Email: tishyachauhan07@gmail.com
+- 📧 **Email**: tishyachauhan07@gmail.com
+- 🐛 **Bug Reports**: Use GitHub Issues
+- 💡 **Feature Requests**: Use GitHub Discussions
+- 📚 **Documentation**: Check this README first
 
+### Quick Links:
+- [Dataset Download](https://www.kaggle.com/datasets/atrithakar/banana-classification) 
+- [API Documentation](http://localhost:8000/docs) (when running)
+- [Model Performance Charts](model/)
 
 ---
 
 **Made with 🍌 and ❤️ by Tishya**
 
 *Last updated: September 6, 2025*
+
+> **Important**: Don't forget to download the dataset from Kaggle before training! The model training requires the dataset to be placed in the `dataset/` folder as shown in the project structure above.
